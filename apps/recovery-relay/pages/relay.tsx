@@ -1,14 +1,15 @@
 import { Typography } from '@mui/material';
 import { RelayBasePage, RelayRequestParams } from '@fireblocks/recovery-shared';
+import { QR_ACTION_TX_BROADCAST, QR_ACTION_TX_CREATE } from '@fireblocks/recovery-shared/constants';
 import { useWorkspace } from '../context/Workspace';
 
 const getRxTitle = (params?: RelayRequestParams) => {
   switch (params?.action) {
     case 'import':
       return 'Extended public keys & wallet';
-    case 'tx/create':
+    case QR_ACTION_TX_CREATE:
       return 'New transaction request';
-    case 'tx/broadcast':
+    case QR_ACTION_TX_BROADCAST:
       return 'Signed transaction';
     default:
       return undefined;

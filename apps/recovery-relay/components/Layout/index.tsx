@@ -9,15 +9,16 @@ import {
   RelayRequestParams,
   useOfflineQuery,
 } from '@fireblocks/recovery-shared';
+import { QR_ACTION_TX_BROADCAST, QR_ACTION_TX_CREATE } from '@fireblocks/recovery-shared/constants';
 import packageJson from '../../package.json';
 import { useWorkspace } from '../../context/Workspace';
 import { WithdrawModal } from '../WithdrawModal';
 
 const getWithdrawModalKey = (inboundRelayParams?: RelayRequestParams) => {
   switch (inboundRelayParams?.action) {
-    case 'tx/create':
+    case QR_ACTION_TX_CREATE:
       return inboundRelayParams.newTx.assetId;
-    case 'tx/broadcast':
+    case QR_ACTION_TX_BROADCAST:
       return inboundRelayParams.signedTx.assetId;
     default:
       return undefined;

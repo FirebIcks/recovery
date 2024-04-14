@@ -11,7 +11,12 @@ import {
   useWrappedState,
 } from '@fireblocks/recovery-shared';
 import { getDerivableAssetConfig } from '@fireblocks/asset-config';
-import { LOGGER_NAME_RELAY } from '@fireblocks/recovery-shared/constants';
+import {
+  LOGGER_NAME_RELAY,
+  QR_ACTION_TX_BROADCAST,
+  QR_ACTION_TX_CREATE,
+  QR_ACTION_TX_SIGN,
+} from '@fireblocks/recovery-shared/constants';
 import { sanatize } from '@fireblocks/recovery-shared/lib/sanatize';
 import { useWorkspace } from '../../context/Workspace';
 import { CreateTransaction } from './CreateTransaction';
@@ -24,10 +29,10 @@ const getAssetId = (inboundRelayParams?: RelayRequestParams) => {
 
   logger.debug(`Trying to get asset Id for ${JSON.stringify(inboundRelayParams, null, 2)}`);
   switch (inboundRelayParams?.action) {
-    case 'tx/create':
+    case QR_ACTION_TX_CREATE:
       assetId = inboundRelayParams.newTx.assetId;
       break;
-    case 'tx/broadcast':
+    case QR_ACTION_TX_BROADCAST:
       assetId = inboundRelayParams.signedTx.assetId;
       break;
     default:
@@ -61,7 +66,7 @@ export const WithdrawModal = () => {
     );
     setOutboundRelayUrl(
       getOutboundRelayUrl({
-        action: 'tx/sign',
+        action: QR_ACTION_TX_SIGN,
         accountId: inboundRelayParams?.accountId as number,
         unsignedTx,
       }),
@@ -91,7 +96,7 @@ export const WithdrawModal = () => {
     >
       {asset && inboundRelayParams ? (
         <>
-          {action === 'tx/create' &&
+          {action === QR_ACTION_TX_CREATE &&
             (outboundRelayUrl ? (
               <>
                 <Typography variant='body1' paragraph>
@@ -112,7 +117,7 @@ export const WithdrawModal = () => {
                 setSignTxResponseUrl={setSignTxResponseUrl}
               />
             ))}
-          {action === 'tx/broadcast' && (
+          {action === QR_ACTION_TX_BROADCAST && (
             <Box display='flex' alignItems='center' justifyContent='center' flexDirection='column'>
               {!txHash && (
                 <>

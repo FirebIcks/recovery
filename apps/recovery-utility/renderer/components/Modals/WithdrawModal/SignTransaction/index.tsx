@@ -15,6 +15,7 @@ import {
 } from '@fireblocks/recovery-shared';
 import { AssetConfig } from '@fireblocks/asset-config';
 import { CallMade, CallReceived, LeakAdd, Toll } from '@mui/icons-material';
+import { LOGGER_NAME_UTILITY, QR_ACTION_TX_BROADCAST } from '@fireblocks/recovery-shared/constants';
 import { useWorkspace } from '../../../../context/Workspace';
 import { useSettings } from '../../../../context/Settings';
 import { SigningWallet } from '../../../../lib/wallets/SigningWallet';
@@ -26,7 +27,6 @@ import {
   BTCLegacyUTXO,
   GenerateTxInput,
 } from '../../../../lib/wallets/types';
-import { LOGGER_NAME_UTILITY } from '@fireblocks/recovery-shared/constants';
 
 const BlockedMessage = ({ children }: { children: ReactNode }) => (
   <Box>
@@ -107,7 +107,7 @@ export const SignTransaction = ({ txId, account, asset, inboundRelayParams }: Pr
 
     setOutboundRelayUrl(
       getOutboundRelayUrl({
-        action: 'tx/broadcast',
+        action: QR_ACTION_TX_BROADCAST,
         accountId: account.id,
         signedTx: {
           id: unsignedTx.id,

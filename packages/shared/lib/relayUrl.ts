@@ -12,7 +12,7 @@ import {
   RelayResponseParams,
 } from '../schemas/relayUrl';
 import { getLogger } from './getLogger';
-import { LOGGER_NAME_SHARED } from '../constants';
+import { LOGGER_NAME_SHARED, QR_ACTION_TX_BROADCAST, QR_ACTION_TX_CREATE, QR_ACTION_TX_SIGN } from '../constants';
 
 const logger = getLogger(LOGGER_NAME_SHARED);
 
@@ -30,16 +30,16 @@ const getSchema = (action: RelayParams['action'], app: 'utility' | 'relay') => {
     switch (action) {
       case 'import':
         return relayImportRequestParams;
-      case 'tx/create':
+      case QR_ACTION_TX_CREATE:
         return relayCreateTxRequestParams;
-      case 'tx/broadcast':
+      case QR_ACTION_TX_BROADCAST:
         return relayBroadcastTxRequestParams;
       default:
         throw error;
     }
   }
 
-  if (app === 'utility' && action === 'tx/sign') {
+  if (app === 'utility' && action === QR_ACTION_TX_SIGN) {
     return relaySignTxResponseParams;
   }
 

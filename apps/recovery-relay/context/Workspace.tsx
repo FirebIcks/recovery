@@ -11,9 +11,9 @@ import {
   useOfflineQuery,
 } from '@fireblocks/recovery-shared';
 import { getAssetConfig } from '@fireblocks/asset-config';
+import { LOGGER_NAME_RELAY, QR_ACTION_TX_BROADCAST, QR_ACTION_TX_CREATE } from '@fireblocks/recovery-shared/constants';
 import packageJson from '../package.json';
 import { WalletClasses, Derivation } from '../lib/wallets';
-import { LOGGER_NAME_RELAY } from '@fireblocks/recovery-shared/constants';
 
 type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
 
@@ -70,13 +70,13 @@ const getInboundRelayWalletIds = (inboundRelayParams?: RelayRequestParams) => {
         assetId: inboundRelayParams.assetId,
       };
       break;
-    case 'tx/create':
+    case QR_ACTION_TX_CREATE:
       ret = {
         accountId: inboundRelayParams.accountId,
         assetId: inboundRelayParams.newTx.assetId,
       };
       break;
-    case 'tx/broadcast':
+    case QR_ACTION_TX_BROADCAST:
       ret = {
         accountId: inboundRelayParams.signedTx.path[2],
         assetId: inboundRelayParams.signedTx.assetId,

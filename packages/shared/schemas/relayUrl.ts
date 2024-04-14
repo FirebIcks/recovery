@@ -1,6 +1,7 @@
 import semverRegex from 'semver-regex';
 import { z } from 'zod';
 import { getExtendedKeySchema } from './extendedKeys';
+import { QR_ACTION_TX_BROADCAST, QR_ACTION_TX_CREATE, QR_ACTION_TX_SIGN } from '../constants';
 
 // A Relay URL is the interface between Recovery Utility and Recovery Relay.
 // Relay URLs are encoded in QR codes which are scanned by either app to
@@ -44,7 +45,7 @@ export const relayImportRequestParams = relayBaseRequestParams.extend({
 export type RelayImportRequestParams = z.infer<typeof relayImportRequestParams>;
 
 export const relayCreateTxRequestParams = relayBaseRequestParams.extend({
-  action: actionSchema('tx/create'),
+  action: actionSchema(QR_ACTION_TX_CREATE),
   newTx: newTxSchema,
 });
 
@@ -66,7 +67,7 @@ const preparedTxSchema = newTxSchema.extend({
 const hexString = z.string().regex(/^[0-9a-fA-F]*$/, 'Invalid hex');
 
 export const relayBroadcastTxRequestParams = relayBaseRequestParams.extend({
-  action: actionSchema('tx/broadcast'),
+  action: actionSchema(QR_ACTION_TX_BROADCAST),
   signedTx: preparedTxSchema.extend({
     hex: z.string().nonempty('Serialized transaction is required'),
   }),
@@ -85,7 +86,7 @@ const relayBaseResponseParams = z.object({
 });
 
 export const relaySignTxResponseParams = relayBaseResponseParams.extend({
-  action: actionSchema('tx/sign'),
+  action: actionSchema(QR_ACTION_TX_SIGN),
   unsignedTx: preparedTxSchema.extend({
     balance: z.number().nonnegative('Balance cannot be negative'),
     misc: z

@@ -11,10 +11,10 @@ import {
   useWrappedState,
 } from '@fireblocks/recovery-shared';
 import { getAssetConfig, derivableAssets, AssetConfig, getDerivableAssetConfig } from '@fireblocks/asset-config';
+import { LOGGER_NAME_UTILITY, QR_ACTION_TX_CREATE, QR_ACTION_TX_SIGN } from '@fireblocks/recovery-shared/constants';
 import { useWorkspace } from '../../../context/Workspace';
 import { InitiateTransaction } from './InitiateTransaction';
 import { SignTransaction } from './SignTransaction';
-import { LOGGER_NAME_UTILITY } from '@fireblocks/recovery-shared/constants';
 
 type Props = {
   assetId?: string;
@@ -103,7 +103,7 @@ export const WithdrawModal = ({ assetId, accountId, open, onClose: onCloseModal 
 
     logger.info('Creating outbound relay url');
     const createTxUrl = getOutboundRelayUrl({
-      action: 'tx/create',
+      action: QR_ACTION_TX_CREATE,
       accountId: data.accountId,
       newTx: {
         id: newTxId,
@@ -132,10 +132,10 @@ export const WithdrawModal = ({ assetId, accountId, open, onClose: onCloseModal 
         ) as ReactNode
       }
     >
-      {inboundRelayParams?.action === 'tx/sign' && !!selectedAccount && !!selectedAsset && (
+      {inboundRelayParams?.action === QR_ACTION_TX_SIGN && !!selectedAccount && !!selectedAsset && (
         <SignTransaction txId={newTxId} account={selectedAccount} asset={selectedAsset} inboundRelayParams={inboundRelayParams} />
       )}
-      {!!createTxOutboundRelayUrl && !!txInitData && inboundRelayParams?.action !== 'tx/sign' && (
+      {!!createTxOutboundRelayUrl && !!txInitData && inboundRelayParams?.action !== QR_ACTION_TX_SIGN && (
         <>
           <Typography variant='body1' paragraph>
             Scan the QR code with an online device to create a transaction with Recovery Relay. Pass QR codes back and forth to
