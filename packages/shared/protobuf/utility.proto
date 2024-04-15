@@ -1,0 +1,24 @@
+syntax = "proto3";
+package utility;
+
+message DerivationPath {
+  int32 base = 600;
+  int32 coin_type = 601;
+  int32 account_id = 602;
+  int32 change_index = 603;
+  int32 address_index = 604;
+}
+
+message CreateTxRequest{
+  string action = 1;
+  string id = 2;
+  string assetId = 3;
+  string to = 4;
+}
+
+message BroadcastTxRequest {
+  string action = 1;
+  string id = 2;
+  string hex = 3;
+  optional string endpoint = 4;
+}

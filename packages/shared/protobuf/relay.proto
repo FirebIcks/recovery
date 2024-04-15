@@ -1,0 +1,175 @@
+syntax = "proto3";
+package relay;
+
+import "utility.proto";
+
+enum UTXOType {
+  B = 0;  // Bitcoin
+  BS = 1; // Bitcoin Segwit
+  BL = 2; // Bitcoin Legacy
+}
+
+message XTZAdditionalParams {
+  /**
+    const protocolConstants = await this._getProtocolConstants();
+    const accountLimit = await this._getAccountLimits(protocolConstants);
+    const blockHash = (await this.tezos.rpc.getBlockHeader()).hash;
+    const protocol = (await this.tezos.rpc.getProtocols({ block: 'head' })).next_protocol;
+    const headCounter = (await this.tezos.rpc.getContract(this.address, { block: 'head' })).counter || '0';
+    const manager = await this.tezos.rpc.getManagerKey(this.address, { block: 'head' });
+    const revealNeeded = !(manager && typeof manager === 'object' ? !!manager.key : !!manager);
+    extraParams.set(this.KEY_ESTIMATE, {
+      gas: estimate.gasLimit,
+      storage: estimate.storageLimit,
+      fee: estimate.suggestedFeeMutez,
+    });
+    extraParams.set(this.KEY_BLOCK_HASH, blockHash);
+    extraParams.set(this.KEY_ACCOUNT_LIMIT, accountLimit);
+    extraParams.set(this.KEY_PROTOCOL_HASH, protocol);
+    extraParams.set(this.KEY_HEAD_COUNTER, headCounter);
+    extraParams.set(this.KEY_REVEAL, revealNeeded);
+  */
+  bool should_reveal = 100;
+  int32 header_counter = 101;
+  string protocol_hash = 102;
+  float account_limit_gas_limit = 103;
+  int64 account_limit_storage_limit = 104;
+  float estimate_fee = 110;
+  float estimate_storage = 111;
+  float estimate_gas_limit = 112; // Not the same as the above
+}
+
+message XRPAdditionalParams {
+  /**
+    extraParams.set(this.KEY_LEDGER_SEQUENCE, (await this.xrpClient.getLedgerIndex()) + 100);
+    extraParams.set(this.KEY_FEE, fee);
+    extraParams.set(
+      this.KEY_SEQUENCE,
+      (
+        await this.xrpClient.request({
+          command: 'account_info',
+          account: this.address,
+          ledger_index: 'current',
+        })
+      ).result.account_data.Sequence,
+    );
+  */
+  int64 sequence = 200;
+  float fee = 201;
+  int64 ledger_sequence = 202;
+}
+
+message XLMAdditionalParams {
+  /**
+    const sequence = this.account!.sequenceNumber();
+    extraParams.set(this.KEY_SEQUENCE, sequence);
+    extraParams.set(this.KEY_ACCOUNT_ID, this.account!.accountId());
+    */
+    string sequence = 300;
+    string account_id = 301;
+}
+
+message TronAdditionalParams {
+  /**
+    const metadata = {
+      ref_block_bytes: blockData.block_header.raw_data.number.toString(16).slice(-4).padStart(4, '0'),
+      ref_block_hash: blockData.blockID.slice(16, 32),
+      expiration: blockData.block_header.raw_data.timestamp + 600 * 1000,
+      timestamp: blockData.block_header.raw_data.timestamp,
+    };
+    extraParams.set(this.KEY_METADATA, metadata);
+    */
+  string ref_block_bytes = 350;
+  string ref_block_hash = 351;
+  int64 expiration = 352;
+  int64 timestamp = 353;
+}
+
+message LUNAAdditinalParams {
+  /**
+    const account = await this.lcdClient.auth.accountInfo(this.address);
+    const sequence = account.getSequenceNumber();
+    const sendMsg = new MsgSend(this.address, to!, { uluna: balance * 1000000 });
+    const fee = await this.lcdClient.tx.estimateFee([{ sequenceNumber: sequence, publicKey: account.getPublicKey() }], {
+      msgs: [sendMsg],
+      memo,
+    });
+    extraParams.set(this.KEY_SEQUENCE, sequence);
+    extraParams.set(this.KEY_FEE_ESTIMATE, fee);
+    extraParams.set(this.KEY_CHAIN_ID, this.lcdClient.config.chainID);
+    extraParams.set(this.KEY_ACCOUNT_NUMBER, account.getAccountNumber());
+  */
+  int32 sequence = 400;
+  float fee = 401;
+  string chain_id = 402;
+  int32 account_number = 403;
+}
+
+message DOT_KSMAdditionalParams {
+  /**
+    const { nonce } = await this.kusamaApi!.query.system.account(this.address);
+    const genesisHash = this.kusamaApi!.genesisHash.toHex();
+    const blockHash = (await this.kusamaApi!.rpc.chain.getBlockHash()).toHex();
+    const blockNum = (await this.kusamaApi!.rpc.chain.getBlock()).block.header.number.toNumber();
+    const specVersion = this.kusamaApi!.runtimeVersion.specVersion.toNumber();
+    const specName = this.kusamaApi!.runtimeVersion.specName.toHuman();
+    const transactionVersion = this.kusamaApi!.runtimeVersion.transactionVersion.toNumber();
+    const rpc = (await this.kusamaApi!.rpc.state.getMetadata()).toHex();
+    extraParams.set(this.KEY_BLOCK_HASH, blockHash);
+    extraParams.set(this.KEY_BLOCK_NUM, blockNum);
+    extraParams.set(this.KEY_SPEC_VERSION, specVersion);
+    extraParams.set(this.KEY_GENESIS_HASH, genesisHash);
+    extraParams.set(this.KEY_SPEC_NAME, specName);
+    extraParams.set(this.KEY_TX_VER, transactionVersion);
+  */
+  int32 block_num = 450;
+  int32 spec_version = 451;
+  string genesis_hash = 452;
+  string spec_name = 453;
+  int32 tx_version = 454;
+}
+
+message HBARAdditionalParams {
+  /**
+    const network = this.client!.network;
+    const nodeIdsKeys = Object.keys(network);
+    const nodeIds = nodeIdsKeys.map((nodeIdKey) => {
+      if (network[nodeIdKey] instanceof String) {
+        return network[nodeIdKey];
+      } else {
+        return (network[nodeIdKey] as AccountId).toString();
+      }
+    });
+    extraParams.set(this.KEY_ACCOUNT_ID, this.address);
+    extraParams.set(this.KEY_NODE_ACCOUNT_IDS, nodeIds);
+  */
+  string account_id = 500;
+  repeated string node_ids = 501;
+}
+
+
+message UnsignedTx {
+  DerivationPath path = 3;
+  float balance = 4;
+  optional float fee_rate = 5;
+
+  optional float gas_price = 6;
+  optional int32 nonce = 7;
+  optional int32 chain_id = 8;
+  optional string memo = 9;
+  optional string endpoint = 10;
+
+  optional string blockhash = 9;
+  optional UTXOType utxo_type = 10;
+
+
+  optional oneof extra_params {
+     XTZAdditionalParams xtz_params = 11;
+     XRPAdditionalParams xrp_params = 12;
+     XLMAdditionalParams xlm_params = 13;
+     TronAdditionalParams tron_params = 14;
+     LUNAAdditinalParams luna_params = 15;
+     DOT_KSMAdditionalParams dot_ksm_params = 16;
+     HBARAdditionalParams hbar_params = 17;
+  }
+}

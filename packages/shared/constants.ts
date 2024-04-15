@@ -7,3 +7,7 @@ export const LOGGER_NAME_SHARED = 'shared';
 export const QR_ACTION_TX_SIGN = 'tx/sign';
 export const QR_ACTION_TX_CREATE = 'tx/create';
 export const QR_ACTION_TX_BROADCAST = 'tx/broadcast';
+
+export const QR_ACTION_SOL_CREATE_NONCE_ACC = 'sol/create_nonce_acc';
+export const QR_ACTION_SOL_UNSTAKE = 'sol/unstake';
+export const QR_ACTION_SOL_UNSTAKE_SIGN = 'sol/unstake_sign';
