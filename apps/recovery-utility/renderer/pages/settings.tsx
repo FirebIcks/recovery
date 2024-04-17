@@ -1,17 +1,26 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button, TextField, QrCode, settingsInput, theme, monospaceFontFamily, getLogger } from '@fireblocks/recovery-shared';
-import { Box, Grid, Typography } from '@mui/material';
+import {
+  Button,
+  TextField,
+  QrCode,
+  settingsInput,
+  theme,
+  monospaceFontFamily,
+  getLogger,
+  useWrappedState,
+} from '@fireblocks/recovery-shared';
+import { Box, Checkbox, FormControlLabel, Grid, Typography } from '@mui/material';
 import walletDerivationPackage from '@fireblocks/wallet-derivation/package.json';
 import extendedKeyRecoveryPackage from '@fireblocks/extended-key-recovery/package.json';
+import { LOGGER_NAME_UTILITY } from '@fireblocks/recovery-shared/constants';
+import { shell } from 'electron';
+import { useEffect } from 'react';
 import utilityPackage from '../../package.json';
 import { useSettings, defaultSettings } from '../context/Settings';
 import { useWorkspace } from '../context/Workspace';
-import { download } from '@fireblocks/recovery-shared';
-import { getLogs as ipcGetLogs, getLogsPath as ipcGetLogsPath } from '../lib/ipc';
-import { LOGGER_NAME_UTILITY } from '@fireblocks/recovery-shared/constants';
-import { shell } from 'electron';
+import { getLogsPath as ipcGetLogsPath } from '../lib/ipc';
 
 type FormData = z.infer<typeof settingsInput>;
 
@@ -20,36 +29,48 @@ const RELAY_SOURCE_URL = 'github.com/fireblocks/recovery';
 const logger = getLogger(LOGGER_NAME_UTILITY);
 
 const Settings = () => {
-  const { idleMinutes, relayBaseUrl, saveSettings } = useSettings();
+  const { idleMinutes, relayBaseUrl, useProtobuf, saveSettings } = useSettings();
+
+  const [idleMinutesSetting, setIdleMinutesSettings] = useWrappedState<number>('settings-idleMinutes', idleMinutes);
+  const [relayBaseUrlSetting, setRelayBaseUrlSettings] = useWrappedState<string>('settings-relayBaseUrl', relayBaseUrl);
+  const [useProtobufSetting, setUseProtobufSettings] = useWrappedState<boolean>('settings-useProtobuf', useProtobuf);
 
   const { reset: resetWorkspace } = useWorkspace();
 
   const {
     register,
-    handleSubmit,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(settingsInput),
     defaultValues: {
       idleMinutes,
       relayBaseUrl,
+      useProtobuf,
     },
   });
 
-  const downloadLogs = async () => {
-    // logger.debug('Downloading logs');
-    // const logsZip = await ipcGetLogs();
-    // download(logsZip, 'recovery-utility-logs.zip', 'application/zip');
-    shell.openPath(await ipcGetLogsPath());
+  const useEffectFn = (variable: 'idleMinutes' | 'relayBaseUrl') => () => {
+    setTimeout(async () => {
+      if (errors[variable]?.message) {
+        return;
+      }
+
+      await saveSettings({ [variable]: variable === 'idleMinutes' ? idleMinutesSetting : relayBaseUrlSetting });
+    }, 0);
   };
 
-  const onSubmit = async (formData: FormData) => {
-    logger.debug('Saving form data', formData);
-    saveSettings(formData);
-  };
+  useEffect(useEffectFn('idleMinutes'), [idleMinutesSetting]);
+  useEffect(useEffectFn('relayBaseUrl'), [relayBaseUrlSetting]);
+  useEffect(() => {
+    (async () => {
+      await saveSettings({ useProtobuf: useProtobufSetting });
+    })();
+  }, [useProtobufSetting]);
+
+  const downloadLogs = async () => shell.openPath(await ipcGetLogsPath());
 
   return (
-    <Box component='form' display='flex' height='100%' flexDirection='column' onSubmit={handleSubmit(onSubmit)}>
+    <Box component='form' display='flex' height='100%' flexDirection='column'>
       <Typography variant='h1'>Settings</Typography>
       <Grid container spacing={2} paddingBottom='1rem'>
         <Grid item xs={12}>
@@ -68,7 +89,12 @@ const Settings = () => {
                 placeholder={defaultSettings.idleMinutes.toString()}
                 helpText='Resets when this system is inactive.'
                 error={errors.idleMinutes?.message}
-                {...register('idleMinutes', { valueAsNumber: true })}
+                value={idleMinutesSetting}
+                // {...register('idleMinutes', { valueAsNumber: true })}
+                onChange={(event) => {
+                  console.log('Idle minutes:', event.target.value);
+                  setIdleMinutesSettings(parseInt(event.target.value, 10));
+                }}
               />
             </Grid>
           </Grid>
@@ -81,20 +107,16 @@ const Settings = () => {
                 id='relayBaseUrl'
                 type='url'
                 label='Base URL'
+                value={relayBaseUrlSetting}
                 placeholder={defaultSettings.relayBaseUrl}
                 helpText='You can host your own Recovery Relay. See source at github.com/fireblocks/recovery. DO NOT USE RELAY URLS FROM UNTRUSTED PARTIES!'
                 error={errors.relayBaseUrl?.message}
                 {...register('relayBaseUrl')}
+                onChange={(event) => {
+                  console.log('Relay base url:', event.target.value);
+                  setRelayBaseUrlSettings(event.target.value);
+                }}
               />
-              <Grid item xs={9} marginTop='1rem'>
-                <Grid alignItems='center'>
-                  <Grid item>
-                    <Button type='submit' color='primary'>
-                      Save
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Grid>
             </Grid>
             <Grid item xs={3}>
               <Typography fontWeight='500' color={(t) => t.palette.grey[900]} marginBottom='0.25rem'>
@@ -109,13 +131,24 @@ const Settings = () => {
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <Typography variant='h2'>Logs</Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <Button type='submit' size='large' variant='outlined' fullWidth color='primary' onClick={downloadLogs}>
-                Show Logs
-              </Button>
+        <Grid item>
+          <Grid container xs={12}>
+            <Grid container xs={4}>
+              <Grid item direction='column'>
+                <Typography variant='h2'>Logs</Typography>
+                <Button type='submit' size='large' variant='outlined' fullWidth color='primary' onClick={downloadLogs}>
+                  Show Logs
+                </Button>
+              </Grid>
+            </Grid>
+            <Grid container xs={8}>
+              <Grid item direction='column'>
+                <Typography variant='h2'>QR Generation</Typography>
+                <FormControlLabel
+                  control={<Checkbox onChange={(_, checked) => setUseProtobufSettings(checked)} checked={useProtobufSetting} />}
+                  label='Should use protobuf instead of jsoncrush as QR content generation'
+                />
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
