@@ -70,6 +70,7 @@ const NCW = () => {
 
   const onSubmit = async (formData: NCWCsvFileInput) => {
     parse<{ 'Wallet Id': string }>(formData.walletIdsFile!, {
+      delimiter: ',' || '/n',
       worker: true,
       header: true,
       dynamicTyping: true,
